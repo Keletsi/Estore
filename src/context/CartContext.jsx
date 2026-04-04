@@ -1,11 +1,33 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+
+const CART_STORAGE_KEY = "ecommerce_cart";
 
 const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+const loadCartFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(CART_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
 
-  // Add item — if same product+size+color exists, increase qty
+const saveCartToStorage = (items) => {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.error("Failed to save cart to storage:", error);
+  }
+};
+
+export const CartProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useState(loadCartFromStorage);
+
+  useEffect(() => {
+    saveCartToStorage(cartItems);
+  }, [cartItems]);
+
   const addToCart = (product, quantity = 1, size = null, color = null) => {
     setCartItems((prev) => {
       const existing = prev.find(
@@ -29,7 +51,7 @@ export const CartProvider = ({ children }) => {
           productId: product._id,
           name: product.name,
           price: product.price,
-          image: product.images[0]?.url,
+          image: product.images?.[0]?.url || product.imageUrl,
           size,
           color,
           quantity,
@@ -64,8 +86,10 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // Clear entire cart
-  const clearCart = () => setCartItems([]);
+  const clearCart = () => {
+    setCartItems([]);
+    localStorage.removeItem(CART_STORAGE_KEY);
+  };
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotal = cartItems.reduce(

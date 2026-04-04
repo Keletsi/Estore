@@ -24,6 +24,5 @@ yarn-debug.log*
 .DS_Store
 
 # Compiled / library JS
-src/**/*.js
-src/**/*.mjs
+
 *.map

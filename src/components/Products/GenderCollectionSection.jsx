@@ -10,7 +10,7 @@ const GenderCollectionSection = () => {
 
         {/* Men's Collection */}
         <Link
-          to="/collection/men"
+          to="/shop?category=men"
           className="relative group overflow-hidden rounded-lg block"
         >
           <div className="aspect-[3/4] w-full overflow-hidden">
@@ -34,7 +34,7 @@ const GenderCollectionSection = () => {
 
         {/* Women's Collection */}
         <Link
-          to="/collection/women"
+          to="/shop?category=women"
           className="relative group overflow-hidden rounded-lg block"
         >
           <div className="aspect-[3/4] w-full overflow-hidden">

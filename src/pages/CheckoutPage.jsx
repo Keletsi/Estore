@@ -1,23 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { createOrder } from "../services/orderService";
 
 const SHIPPING_COST = 50;
+const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "pk_test_placeholder";
 
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState("checkout"); // "checkout" | "confirmed"
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState("checkout");
+  const [paystackLoaded, setPaystackLoaded] = useState(false);
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     address: "", city: "", province: "", postalCode: "",
     payment: "card",
-    cardNumber: "", cardExpiry: "", cardCvc: "",
   });
   const [errors, setErrors] = useState({});
 
   const total = cartTotal + SHIPPING_COST;
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v2/inline.js";
+    script.async = true;
+    script.onload = () => setPaystackLoaded(true);
+    script.onerror = () => console.error("Failed to load Paystack");
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -26,7 +43,6 @@ const CheckoutPage = () => {
 
   const validate = () => {
     const required = ["firstName", "lastName", "email", "address", "city", "province", "postalCode"];
-    if (form.payment === "card") required.push("cardNumber", "cardExpiry", "cardCvc");
     const newErrors = {};
     required.forEach((field) => {
       if (!form[field].trim()) newErrors[field] = "Required";
@@ -35,12 +51,80 @@ const CheckoutPage = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
-    clearCart();
-    setStep("confirmed");
+
+    setLoading(true);
+    try {
+      const shippingInfo = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        city: form.city,
+        province: form.province,
+        postalCode: form.postalCode,
+      };
+
+      const orderTotal = total * 100;
+
+      if (form.payment === "card") {
+        if (!window.PaystackPop) {
+          setErrors({ submit: "Payment system not loaded. Please refresh the page." });
+          setLoading(false);
+          return;
+        }
+
+        const reference = `KTH-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        window.PaystackPop.setup({
+          key: PAYSTACK_PUBLIC_KEY,
+          email: form.email,
+          amount: orderTotal,
+          currency: "ZAR",
+          ref: reference,
+          channels: ["card"],
+          metadata: {
+            custom_fields: [
+              { display_name: "Customer Name", variable_name: "customer_name", value: `${form.firstName} ${form.lastName}` },
+              { display_name: "Phone", variable_name: "phone", value: form.phone },
+            ]
+          },
+          callback: function(response) {
+            createOrder(currentUser?.uid || "guest", cartItems, total, shippingInfo, {
+              paymentRef: response.reference,
+              paymentStatus: "paid",
+            }).then(() => {
+              clearCart();
+              setStep("confirmed");
+            }).catch((err) => {
+              setErrors({ submit: "Order creation failed. Contact support with ref: " + response.reference });
+            }).finally(() => {
+              setLoading(false);
+            });
+          },
+          onClose: function() {
+            setLoading(false);
+          },
+        }).openIframe();
+      } else {
+        await createOrder(currentUser?.uid || "guest", cartItems, total, shippingInfo, {
+          paymentStatus: "pending",
+        });
+        clearCart();
+        setStep("confirmed");
+      }
+    } catch (error) {
+      console.error("Error creating order:", error);
+      setErrors({ submit: "Failed to create order. Please try again." });
+    } finally {
+      if (form.payment === "eft") {
+        setLoading(false);
+      }
+    }
   };
 
   if (cartItems.length === 0 && step !== "confirmed") {
@@ -66,9 +150,14 @@ const CheckoutPage = () => {
         <h2 className="text-2xl font-semibold mb-2">Order Confirmed!</h2>
         <p className="text-gray-500 mb-2">Thank you, {form.firstName}. Your order has been placed.</p>
         <p className="text-gray-400 text-sm mb-8">A confirmation will be sent to {form.email}</p>
-        <Link to="/" className="bg-black text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-900 transition-colors">
-          Continue Shopping
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link to="/track" className="bg-black text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-900 transition-colors">
+            Track Order
+          </Link>
+          <Link to="/" className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors">
+            Continue Shopping
+          </Link>
+        </div>
       </div>
     );
   }
@@ -81,19 +170,22 @@ const CheckoutPage = () => {
   return (
     <div className="container mx-auto px-4 py-10 max-w-5xl">
 
-      {/* Header */}
       <div className="mb-8">
         <Link to="/" className="text-sm text-gray-400 hover:text-black transition-colors">← Back to shop</Link>
         <h1 className="text-2xl font-semibold mt-3">Checkout</h1>
       </div>
 
+      {errors.submit && (
+        <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm">
+          {errors.submit}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col lg:flex-row gap-10">
 
-          {/* ── Left: Form ── */}
           <div className="flex-1 space-y-8">
 
-            {/* Contact */}
             <section>
               <h2 className="text-base font-semibold mb-4 pb-2 border-b">Contact information</h2>
               <div className="grid grid-cols-2 gap-4">
@@ -119,7 +211,6 @@ const CheckoutPage = () => {
               </div>
             </section>
 
-            {/* Shipping */}
             <section>
               <h2 className="text-base font-semibold mb-4 pb-2 border-b">Shipping address</h2>
               <div className="grid grid-cols-2 gap-4">
@@ -146,11 +237,9 @@ const CheckoutPage = () => {
               </div>
             </section>
 
-            {/* Payment */}
             <section>
               <h2 className="text-base font-semibold mb-4 pb-2 border-b">Payment</h2>
 
-              {/* Payment method toggle */}
               <div className="flex gap-3 mb-5">
                 {["card", "eft"].map((method) => (
                   <button
@@ -167,27 +256,10 @@ const CheckoutPage = () => {
               </div>
 
               {form.payment === "card" && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-medium text-gray-600 block mb-1">Card number</label>
-                    <input name="cardNumber" value={form.cardNumber} onChange={handleChange}
-                      placeholder="1234 5678 9012 3456" maxLength={19} className={inputClass("cardNumber")} />
-                    {errors.cardNumber && <p className="text-xs text-red-500 mt-1">{errors.cardNumber}</p>}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 block mb-1">Expiry date</label>
-                      <input name="cardExpiry" value={form.cardExpiry} onChange={handleChange}
-                        placeholder="MM / YY" maxLength={7} className={inputClass("cardExpiry")} />
-                      {errors.cardExpiry && <p className="text-xs text-red-500 mt-1">{errors.cardExpiry}</p>}
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 block mb-1">CVC</label>
-                      <input name="cardCvc" value={form.cardCvc} onChange={handleChange}
-                        placeholder="123" maxLength={4} className={inputClass("cardCvc")} />
-                      {errors.cardCvc && <p className="text-xs text-red-500 mt-1">{errors.cardCvc}</p>}
-                    </div>
-                  </div>
+                <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
+                  <p className="font-medium text-gray-800 mb-2">Paystack Secure Payment</p>
+                  <p>You will be redirected to a secure payment page to enter your card details after placing your order.</p>
+                  <p className="text-xs text-gray-400 mt-2">We accept Visa, Mastercard, and Verve cards.</p>
                 </div>
               )}
 
@@ -204,7 +276,6 @@ const CheckoutPage = () => {
             </section>
           </div>
 
-          {/* ── Right: Order summary ── */}
           <div className="lg:w-80">
             <div className="bg-gray-50 rounded-xl p-6 sticky top-6">
               <h2 className="text-base font-semibold mb-4">Order summary</h2>
@@ -243,9 +314,9 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              <button type="submit"
-                className="w-full bg-black text-white py-3.5 rounded-md font-semibold hover:bg-gray-900 transition-colors mt-6">
-                Place Order
+              <button type="submit" disabled={loading || (form.payment === "card" && !paystackLoaded)}
+                className="w-full bg-black text-white py-3.5 rounded-md font-semibold hover:bg-gray-900 transition-colors mt-6 disabled:opacity-50">
+                {loading ? "Processing..." : paystackLoaded ? "Place Order" : "Loading Payment..."}
               </button>
               <p className="text-xs text-gray-400 text-center mt-3">
                 By placing your order you agree to our terms and conditions.

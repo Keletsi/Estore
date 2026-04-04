@@ -39,31 +39,29 @@ const Hero = () => {
 
 export default Hero;*/
 import React from 'react';
-import { Link } from 'react-router-dom'; // ✅ Import Link
+import { Link } from 'react-router-dom';
 import heroImg from "../../assets/rabbit-hero.webp";
 
 const Hero = () => {
   return (
     <section className="relative w-full h-[80vh] flex items-center justify-center overflow-hidden">
-      {/* Background image */}
       <img
         src={heroImg}
-        alt="Rabbit"
+        alt="Built for the Streets Collection"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* Overlay and content */}
       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
         <div className="text-center text-white p-6">
           <h1 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase mb-4">
-            VACATION <br /> Ready
+            BUILT FOR <br /> THE STREETS
           </h1>
           <p className="text-sm md:text-lg tracking-tight mb-6">
-            Explore our vacation-ready outfits with worldwide shipping.
+            Premium streetwear for the urban lifestyle.
           </p>
           <Link
-            to="#"
-            className="bg-white text-gray-950 px-6 py-2 rounded-sm text-lg hover:bg-gray-200 transition"
+            to="/shop"
+            className="bg-white text-gray-950 px-8 py-3 rounded-sm text-lg font-medium hover:bg-gray-200 transition inline-block"
           >
             Shop Now
           </Link>
