@@ -8,6 +8,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
+
+    // Collaborations collection - anyone can read, only admins can write
+    match /collaborations/{collabId} {
+      allow read: if true;
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
     
     // User collection - users can read, only own user can write their profile
     match /users/{userId} {
@@ -32,6 +38,13 @@ service firebase.storage {
   match /b/{bucket}/o {
     // Product images - anyone can read, only admins can upload
     match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null && request.resource.size < 5 * 1024 * 1024 // 5MB max
+                   && get(/databases/$(bucket)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Collaboration images - anyone can read, only admins can upload
+    match /collaborations/{allPaths=**} {
       allow read: if true;
       allow write: if request.auth != null && request.resource.size < 5 * 1024 * 1024 // 5MB max
                    && get(/databases/$(bucket)/documents/users/$(request.auth.uid)).data.role == 'admin';

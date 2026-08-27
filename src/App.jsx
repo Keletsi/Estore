@@ -7,6 +7,7 @@ import Profile from "./pages/Profile";
 import ShopPage from "./pages/ShopPage";
 import CollectionPage from "./pages/CollectionPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import CollabPage from "./pages/CollabPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderTracking from "./pages/OrderTracking";
 import AdminPanel from "./components/Admin/AdminPanel";
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="collection/all" element={<CollectionPage />} />
           <Route path="collection/:category" element={<CollectionPage />} />
           <Route path="product/:id" element={<ProductDetailPage />} />
+          <Route path="collab/:id" element={<CollabPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="track" element={<OrderTracking />} />
         </Route>

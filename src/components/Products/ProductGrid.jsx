@@ -26,7 +26,7 @@ const ProductGrid = ({ products }) => {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             {/* Quick view overlay */}
-            <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-xs text-center py-2 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+            <div className="absolute inset-x-0 bottom-0 bg-gray-800/60 text-white text-xs text-center py-2 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
               Quick View
             </div>
           </div>

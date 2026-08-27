@@ -188,7 +188,7 @@ const Searchbar = () => {
     <>
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-gray-800/20 backdrop-blur-sm z-40"
           onClick={() => setIsOpen(false)}
         />
       )}

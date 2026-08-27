@@ -168,8 +168,8 @@ const CollectionPage = () => {
                 onClick={() => setTypeFilter(f.value)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
                   typeFilter === f.value
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-gray-600 border-gray-300 hover:border-black"
+                    ? "bg-gray-800 text-white border-gray-800"
+                    : "bg-white text-gray-600 border-gray-300 hover:border-gray-700"
                 }`}
               >
                 {f.label}
@@ -183,7 +183,7 @@ const CollectionPage = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-black transition-colors cursor-pointer"
+            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-gray-700 transition-colors cursor-pointer"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>

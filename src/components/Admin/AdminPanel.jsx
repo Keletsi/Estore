@@ -4,6 +4,12 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { storage, db } from "../../firebase";
 import { useAuth } from "../../context/AuthContext";
+import {
+  getCollaborations,
+  addCollaboration,
+  updateCollaboration,
+  deleteCollaboration,
+} from "../../services/collabService";
 import { HiPlus, HiPencil, HiTrash, HiX, HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 const AdminPanel = () => {
@@ -68,7 +74,7 @@ const AdminPanel = () => {
       <div className="container mx-auto px-4 py-24 text-center">
         <h2 className="text-2xl font-semibold mb-4">Admin Access Required</h2>
         <p className="text-gray-500 mb-6">You need admin privileges to access this page.</p>
-        <button onClick={() => navigate("/")} className="bg-black text-white px-6 py-2 rounded-md">
+        <button onClick={() => navigate("/")} className="bg-gray-800 text-white px-6 py-2 rounded-md">
           Go Home
         </button>
       </div>
@@ -97,17 +103,17 @@ const AdminPanel = () => {
       )}
 
       <div className="flex gap-4 mb-8 border-b">
-        {["products", "add-product", "orders"].map((tab) => (
+        {["products", "add-product", "collabs", "orders"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`pb-3 px-2 text-sm font-medium transition-colors border-b-2 ${
               activeTab === tab
-                ? "border-black text-black"
+                ? "border-gray-800 text-gray-900"
                 : "border-transparent text-gray-500 hover:text-black"
             }`}
           >
-            {tab === "products" ? "All Products" : tab === "add-product" ? "Add Product" : "Orders"}
+            {tab === "products" ? "All Products" : tab === "add-product" ? "Add Product" : tab === "collabs" ? "Collaborations" : "Orders"}
           </button>
         ))}
       </div>
@@ -122,6 +128,8 @@ const AdminPanel = () => {
         <ProductsTab products={products} onDelete={fetchData} onError={showError} onSuccess={showSuccess} />
       ) : activeTab === "add-product" ? (
         <AddProductTab onSuccess={fetchData} onError={showError} onSuccessMsg={showSuccess} />
+      ) : activeTab === "collabs" ? (
+        <CollabsTab products={products} onError={showError} onSuccess={showSuccess} />
       ) : (
         <OrdersTab orders={orders} onError={showError} onSuccess={showSuccess} />
       )}
@@ -253,7 +261,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="e.g., Classic White Tee"
           />
         </div>
@@ -268,7 +276,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             required
             min="0"
             step="0.01"
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="299.99"
           />
         </div>
@@ -282,7 +290,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             onChange={handleChange}
             min="0"
             step="0.01"
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="399.99"
           />
         </div>
@@ -295,7 +303,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             value={form.stock}
             onChange={handleChange}
             min="0"
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="10"
           />
         </div>
@@ -307,8 +315,8 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             name="brand"
             value={form.brand}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
-            placeholder="e.g., Keth"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
+            placeholder="e.g., TallBoy"
           />
         </div>
 
@@ -319,7 +327,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             name="material"
             value={form.material}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="e.g., 100% Cotton"
           />
         </div>
@@ -330,7 +338,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             name="gender"
             value={form.gender}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
           >
             <option value="men">Men</option>
             <option value="women">Women</option>
@@ -343,7 +351,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             name="type"
             value={form.type}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
           >
             <option value="top-wear">Top Wear</option>
             <option value="bottom-wear">Bottom Wear</option>
@@ -357,7 +365,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             name="sizes"
             value={form.sizes}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="S,M,L,XL"
           />
         </div>
@@ -369,7 +377,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
             name="colors"
             value={form.colors}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="Black,White,Navy"
           />
         </div>
@@ -382,7 +390,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
           value={form.description}
           onChange={handleChange}
           rows={4}
-          className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+          className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
           placeholder="Product description..."
         />
       </div>
@@ -394,7 +402,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
           accept="image/*"
           multiple
           onChange={handleImageChange}
-          className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+          className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
         />
         {imagePreviews.length > 0 && (
           <div className="flex flex-wrap gap-3 mt-3">
@@ -417,7 +425,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-black text-white py-3 rounded-md font-semibold hover:bg-gray-900 transition-colors disabled:opacity-50"
+        className="w-full bg-gray-800 text-white py-3 rounded-md font-semibold hover:bg-gray-700 transition-colors disabled:opacity-50"
       >
         {loading ? "Adding Product..." : "Add Product"}
       </button>
@@ -471,7 +479,7 @@ const ProductsTab = ({ products, onDelete, onError, onSuccess }) => {
           placeholder="Search products..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-black w-64"
+          className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-gray-700 w-64"
         />
       </div>
 
@@ -543,7 +551,7 @@ const ProductsTab = ({ products, onDelete, onError, onSuccess }) => {
       )}
 
       {editingProduct && (
-        <EditProductModal product={editingProduct} onClose={() => setEditingProduct(null)} onSuccess={fetchData} onError={showError} onSuccessMsg={showSuccess} />
+        <EditProductModal product={editingProduct} onClose={() => setEditingProduct(null)} onSuccess={onDelete} onError={onError} onSuccessMsg={onSuccess} />
       )}
     </div>
   );
@@ -584,7 +592,7 @@ const EditProductModal = ({ product, onClose, onSuccess, onError, onSuccessMsg }
       };
       await updateDoc(doc(db, "products", productId), updatedData);
       if (onSuccessMsg) onSuccessMsg("Product updated!");
-      else if (onSuccess) onSuccess("Product updated!");
+      if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
       onError("Failed to update: " + err.message);
@@ -594,7 +602,7 @@ const EditProductModal = ({ product, onClose, onSuccess, onError, onSuccessMsg }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Edit Product</h3>
@@ -603,33 +611,33 @@ const EditProductModal = ({ product, onClose, onSuccess, onError, onSuccessMsg }
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
-            <input name="name" value={form.name} onChange={handleChange} required className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black" />
+            <input name="name" value={form.name} onChange={handleChange} required className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Price (R) *</label>
-              <input name="price" value={form.price} onChange={handleChange} required type="number" step="0.01" className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black" />
+              <input name="price" value={form.price} onChange={handleChange} required type="number" step="0.01" className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-              <input name="stock" value={form.stock} onChange={handleChange} type="number" className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black" />
+              <input name="stock" value={form.stock} onChange={handleChange} type="number" className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" value={form.description} onChange={handleChange} rows={3} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black" />
+            <textarea name="description" value={form.description} onChange={handleChange} rows={3} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-              <select name="gender" value={form.gender} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black">
+              <select name="gender" value={form.gender} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700">
                 <option value="men">Men</option>
                 <option value="women">Women</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-              <select name="type" value={form.type} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black">
+              <select name="type" value={form.type} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700">
                 <option value="top-wear">Top Wear</option>
                 <option value="bottom-wear">Bottom Wear</option>
               </select>
@@ -637,14 +645,14 @@ const EditProductModal = ({ product, onClose, onSuccess, onError, onSuccessMsg }
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Sizes (comma separated)</label>
-            <input name="sizes" value={form.sizes} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black" placeholder="S,M,L,XL" />
+            <input name="sizes" value={form.sizes} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700" placeholder="S,M,L,XL" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Colors (comma separated)</label>
-            <input name="colors" value={form.colors} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black" placeholder="Black,White,Navy" />
+            <input name="colors" value={form.colors} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700" placeholder="Black,White,Navy" />
           </div>
           <div className="flex gap-3 pt-4">
-            <button type="submit" disabled={loading} className="flex-1 bg-black text-white py-2.5 rounded-md font-medium hover:bg-gray-800 disabled:opacity-50">
+            <button type="submit" disabled={loading} className="flex-1 bg-gray-800 text-white py-2.5 rounded-md font-medium hover:bg-gray-700 disabled:opacity-50">
               {loading ? "Saving..." : "Save Changes"}
             </button>
             <button type="button" onClick={onClose} className="px-6 py-2.5 border border-gray-300 rounded-md font-medium hover:bg-gray-50">
@@ -692,7 +700,7 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-black"
+          className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-gray-700"
         >
           <option value="all">All Orders</option>
           <option value="pending">Pending</option>
@@ -778,7 +786,7 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
         const order = orders.find(o => o.id === expandedOrder);
         if (!order) return null;
         return (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setExpandedOrder(null)}>
+          <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setExpandedOrder(null)}>
             <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Order #{order.id.slice(-8).toUpperCase()}</h3>
@@ -812,7 +820,7 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
                 <select
                   value={order.status}
                   onChange={(e) => updateStatus(order.id, e.target.value)}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-black"
+                  className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-gray-700"
                 >
                   <option value="pending">Pending</option>
                   <option value="processing">Processing</option>
@@ -825,6 +833,295 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
           </div>
         );
       })()}
+    </div>
+  );
+};
+
+const CollabsTab = ({ products, onError, onSuccess }) => {
+  const [collabs, setCollabs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null); // null | "new" | collab object
+  const [deletingId, setDeletingId] = useState(null);
+
+  const loadCollabs = async () => {
+    setLoading(true);
+    try {
+      setCollabs(await getCollaborations());
+    } catch (err) {
+      console.error("loadCollabs error:", err);
+      onError("Failed to load collaborations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCollabs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleDelete = async (collab) => {
+    if (!window.confirm(`Delete collaboration "${collab.title}"?`)) return;
+    setDeletingId(collab.docId);
+    try {
+      if (collab.imageUrl) {
+        try {
+          await deleteObject(ref(storage, collab.imageUrl));
+        } catch (e) {}
+      }
+      await deleteCollaboration(collab.docId);
+      onSuccess("Collaboration deleted");
+      await loadCollabs();
+    } catch (err) {
+      console.error("Delete collab error:", err);
+      onError("Failed to delete: " + err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-sm text-gray-500">
+          Collaborations shown on the home page. If none exist, the section stays hidden.
+        </p>
+        <button
+          onClick={() => setEditing("new")}
+          className="flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors"
+        >
+          <HiPlus className="h-4 w-4" /> New Collaboration
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-gray-100 rounded-lg h-56 animate-pulse" />
+          ))}
+        </div>
+      ) : collabs.length === 0 ? (
+        <p className="text-center text-gray-500 py-8">No collaborations yet</p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {collabs.map((collab) => (
+            <div key={collab.docId} className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+              <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center">
+                {collab.imageUrl ? (
+                  <img src={collab.imageUrl} alt={collab.title} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-gray-400 text-xs">No Image</span>
+                )}
+              </div>
+              <div className="p-3">
+                {collab.tag && (
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{collab.tag}</p>
+                )}
+                <h3 className="font-medium text-sm truncate">{collab.title}</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  {(collab.productIds?.length || 0)} product{(collab.productIds?.length || 0) === 1 ? "" : "s"}
+                </p>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => setEditing(collab)}
+                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
+                  >
+                    <HiPencil className="h-3 w-3" /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(collab)}
+                    disabled={deletingId === collab.docId}
+                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    <HiTrash className="h-3 w-3" /> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {editing && (
+        <CollabForm
+          collab={editing === "new" ? null : editing}
+          products={products}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            loadCollabs();
+          }}
+          onError={onError}
+          onSuccess={onSuccess}
+        />
+      )}
+    </div>
+  );
+};
+
+const CollabForm = ({ collab, products, onClose, onSaved, onError, onSuccess }) => {
+  const [form, setForm] = useState({
+    title: collab?.title || "",
+    tag: collab?.tag || "",
+    description: collab?.description || "",
+  });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(collab?.imageUrl || "");
+  const [selectedIds, setSelectedIds] = useState(new Set(collab?.productIds || []));
+  const [saving, setSaving] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const toggleProduct = (docId) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(docId)) next.delete(docId);
+      else next.add(docId);
+      return next;
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.title.trim()) {
+      onError("Title is required");
+      return;
+    }
+    setSaving(true);
+    try {
+      let imageUrl = collab?.imageUrl || "";
+      if (imageFile) {
+        const storageRef = ref(storage, `collaborations/${Date.now()}_${imageFile.name}`);
+        await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
+      const collabData = {
+        title: form.title.trim(),
+        tag: form.tag.trim(),
+        description: form.description.trim(),
+        imageUrl,
+        productIds: [...selectedIds],
+      };
+
+      if (collab) {
+        await updateCollaboration(collab.docId, collabData);
+      } else {
+        await addCollaboration(collabData);
+      }
+      onSuccess(collab ? "Collaboration updated!" : "Collaboration added!");
+      onSaved();
+    } catch (err) {
+      console.error("Save collab error:", err);
+      onError("Failed to save: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">{collab ? "Edit Collaboration" : "New Collaboration"}</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-black">✕</button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              required
+              placeholder="e.g., TallBoy × TBW"
+              className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tag</label>
+            <input
+              name="tag"
+              value={form.tag}
+              onChange={handleChange}
+              placeholder="e.g., Limited Drop / Out Now / Coming Soon"
+              className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              rows={3}
+              className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Collab Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
+            />
+            {imagePreview && (
+              <img src={imagePreview} alt="Collab preview" className="mt-3 w-full max-w-xs aspect-video object-cover rounded-lg border" />
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Products in this collaboration ({selectedIds.size} selected)
+            </label>
+            {products.length === 0 ? (
+              <p className="text-sm text-gray-500">No products found. Add products first.</p>
+            ) : (
+              <div className="border border-gray-200 rounded-md max-h-64 overflow-y-auto divide-y divide-gray-100">
+                {products.map((product) => (
+                  <label
+                    key={product.docId}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(product.docId)}
+                      onChange={() => toggleProduct(product.docId)}
+                      className="h-4 w-4 accent-gray-700"
+                    />
+                    {product.images?.[0]?.url && (
+                      <img src={product.images[0].url} alt="" className="w-8 h-10 object-cover rounded" />
+                    )}
+                    <span className="text-sm text-gray-700 truncate">{product.name}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 bg-gray-800 text-white py-2.5 rounded-md font-medium hover:bg-gray-700 disabled:opacity-50"
+            >
+              {saving ? "Saving..." : collab ? "Save Changes" : "Add Collaboration"}
+            </button>
+            <button type="button" onClick={onClose} className="px-6 py-2.5 border border-gray-300 rounded-md font-medium hover:bg-gray-50">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

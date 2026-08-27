@@ -40,18 +40,18 @@ const Hero = () => {
 export default Hero;*/
 import React from 'react';
 import { Link } from 'react-router-dom';
-import heroImg from "../../assets/rabbit-hero.webp";
+import heroImg from "../../assets/TBW Fam 2.jpg.jpeg";
 
 const Hero = () => {
   return (
     <section className="relative w-full h-[80vh] flex items-center justify-center overflow-hidden">
       <img
         src={heroImg}
-        alt="Built for the Streets Collection"
+        alt="TallBoy Clothing Fam"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-gray-800/60 flex items-center justify-center">
         <div className="text-center text-white p-6">
           <h1 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase mb-4">
             BUILT FOR <br /> THE STREETS
@@ -61,7 +61,7 @@ const Hero = () => {
           </p>
           <Link
             to="/shop"
-            className="bg-white text-gray-950 px-8 py-3 rounded-sm text-lg font-medium hover:bg-gray-200 transition inline-block"
+            className="bg-white text-gray-800 px-8 py-3 rounded-sm text-lg font-medium hover:bg-gray-200 transition inline-block"
           >
             Shop Now
           </Link>

@@ -132,7 +132,7 @@ const CheckoutPage = () => {
       <div className="container mx-auto px-4 py-24 text-center max-w-md">
         <h2 className="text-2xl font-semibold mb-3">Your cart is empty</h2>
         <p className="text-gray-500 mb-6">Add some products before checking out.</p>
-        <Link to="/" className="bg-black text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-900 transition-colors">
+        <Link to="/" className="bg-gray-800 text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-700 transition-colors">
           Shop Now
         </Link>
       </div>
@@ -151,7 +151,7 @@ const CheckoutPage = () => {
         <p className="text-gray-500 mb-2">Thank you, {form.firstName}. Your order has been placed.</p>
         <p className="text-gray-400 text-sm mb-8">A confirmation will be sent to {form.email}</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link to="/track" className="bg-black text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-900 transition-colors">
+          <Link to="/track" className="bg-gray-800 text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-700 transition-colors">
             Track Order
           </Link>
           <Link to="/" className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors">
@@ -163,7 +163,7 @@ const CheckoutPage = () => {
   }
 
   const inputClass = (field) =>
-    `w-full border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-black transition-colors ${
+    `w-full border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-gray-800 transition-colors ${
       errors[field] ? "border-red-400 bg-red-50" : "border-gray-300"
     }`;
 
@@ -247,7 +247,7 @@ const CheckoutPage = () => {
                     type="button"
                     onClick={() => setForm((f) => ({ ...f, payment: method }))}
                     className={`flex-1 py-2.5 text-sm border rounded-md font-medium transition-colors ${
-                      form.payment === method ? "bg-black text-white border-black" : "border-gray-300 text-gray-600 hover:border-black"
+                      form.payment === method ? "bg-gray-800 text-white border-gray-800" : "border-gray-300 text-gray-600 hover:border-gray-800"
                     }`}
                   >
                     {method === "card" ? "Credit / Debit Card" : "EFT / Bank Transfer"}
@@ -267,7 +267,7 @@ const CheckoutPage = () => {
                 <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600 space-y-1">
                   <p className="font-medium text-gray-800 mb-2">Bank details</p>
                   <p>Bank: <span className="text-gray-900">FNB</span></p>
-                  <p>Account name: <span className="text-gray-900">Keth Clothing (Pty) Ltd</span></p>
+                  <p>Account name: <span className="text-gray-900">TallBoy Clothing (Pty) Ltd</span></p>
                   <p>Account number: <span className="text-gray-900">62012345678</span></p>
                   <p>Branch code: <span className="text-gray-900">250655</span></p>
                   <p className="text-xs text-gray-400 mt-2">Use your order number as reference. Orders are processed once payment is confirmed.</p>
@@ -315,7 +315,7 @@ const CheckoutPage = () => {
               </div>
 
               <button type="submit" disabled={loading || (form.payment === "card" && !paystackLoaded)}
-                className="w-full bg-black text-white py-3.5 rounded-md font-semibold hover:bg-gray-900 transition-colors mt-6 disabled:opacity-50">
+                className="w-full bg-gray-800 text-white py-3.5 rounded-md font-semibold hover:bg-gray-700 transition-colors mt-6 disabled:opacity-50">
                 {loading ? "Processing..." : paystackLoaded ? "Place Order" : "Loading Payment..."}
               </button>
               <p className="text-xs text-gray-400 text-center mt-3">

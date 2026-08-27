@@ -58,7 +58,7 @@ const OrderTracking = () => {
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-semibold mb-4">Track Your Order</h1>
         <p className="text-gray-500 mb-6">Please sign in to track your orders</p>
-        <Link to="/login" className="bg-black text-white px-6 py-2 rounded-md font-medium">
+        <Link to="/login" className="bg-gray-800 text-white px-6 py-2 rounded-md font-medium">
           Sign In
         </Link>
       </div>
@@ -85,11 +85,11 @@ const OrderTracking = () => {
             placeholder="Enter order ID to search..."
             value={orderId}
             onChange={(e) => setOrderId(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-black"
+            className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-gray-700"
           />
           <button
             onClick={searchOrder}
-            className="bg-black text-white px-6 py-2 rounded-md font-medium hover:bg-gray-800"
+            className="bg-gray-800 text-white px-6 py-2 rounded-md font-medium hover:bg-gray-700"
           >
             Search
           </button>
@@ -112,7 +112,7 @@ const OrderTracking = () => {
           <p className="text-gray-500 mb-4">
             {searchResult ? "Order not found" : "No orders yet"}
           </p>
-          <Link to="/" className="bg-black text-white px-6 py-2 rounded-md text-sm font-medium">
+          <Link to="/" className="bg-gray-800 text-white px-6 py-2 rounded-md text-sm font-medium">
             Start Shopping
           </Link>
         </div>

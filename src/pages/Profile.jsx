@@ -96,7 +96,7 @@ const Profile = () => {
             <p className="text-gray-500 mb-4">No orders yet</p>
             <button
               onClick={() => navigate("/")}
-              className="bg-black text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+              className="bg-gray-800 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors"
             >
               Start Shopping
             </button>
@@ -157,7 +157,7 @@ const Profile = () => {
           <h2 className="text-lg font-medium mb-4">Admin</h2>
           <button
             onClick={() => navigate("/admin")}
-            className="bg-black text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+            className="bg-gray-800 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors"
           >
             Open Admin Panel
           </button>

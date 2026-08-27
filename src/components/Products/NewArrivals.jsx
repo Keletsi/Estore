@@ -38,7 +38,7 @@ const NewArrivals = () => {
   }, []);
 
   const buttonStyle =
-    "p-3 rounded-full border bg-white/70 backdrop-blur-md text-black shadow-md hover:bg-white transition duration-200";
+    "p-3 rounded-full border bg-white/70 backdrop-blur-md text-gray-800 shadow-md hover:bg-white transition duration-200";
 
   const handleScroll = (direction) => {
     const container = scrollRef.current;

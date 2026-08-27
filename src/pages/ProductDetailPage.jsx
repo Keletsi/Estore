@@ -11,7 +11,7 @@ const productDetails = {
     { name: "White", hex: "#F5F5F5" },
     { name: "Navy",  hex: "#1E3A8A" },
   ],
-  brand: "Keth",
+  brand: "TallBoy",
   material: "Premium Cotton",
   description:
     "Crafted for everyday wear and elevated occasions alike. Made with premium materials that feel as good as they look — lightweight, breathable, and built to last.",
@@ -131,7 +131,7 @@ const ProductDetailPage = () => {
 
       {toast && (
         <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-lg shadow-lg text-sm font-medium ${
-          toast === "added" ? "bg-black text-white" : "bg-red-50 text-red-700 border border-red-200"
+          toast === "added" ? "bg-gray-800 text-white" : "bg-red-50 text-red-700 border border-red-200"
         }`}>
           {toast === "added" ? "✓ Added to cart" : "Please select a size and color"}
         </div>
@@ -154,7 +154,7 @@ const ProductDetailPage = () => {
             {images.map((img, i) => (
               <button key={i} onClick={() => setMainImage(i)}
                 className={`flex-shrink-0 w-16 h-20 md:w-20 md:h-24 rounded-lg overflow-hidden border-2 transition-colors ${
-                  mainImage === i ? "border-black" : "border-transparent"
+                  mainImage === i ? "border-gray-800" : "border-transparent"
                 }`}>
                 <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
               </button>
@@ -198,7 +198,7 @@ const ProductDetailPage = () => {
                   <button key={c.name} title={c.name} onClick={() => isAvailable && setSelectedColor(c.name)}
                     disabled={!isAvailable}
                     className={`w-8 h-8 rounded-full border-2 transition-all ${
-                      selectedColor === c.name ? "border-black scale-110" : "border-gray-200 hover:border-gray-400"
+                      selectedColor === c.name ? "border-gray-800 scale-110" : "border-gray-200 hover:border-gray-400"
                     } ${!isAvailable ? "opacity-30 cursor-not-allowed" : ""}`}
                     style={{ backgroundColor: c.hex }}
                   />
@@ -219,7 +219,7 @@ const ProductDetailPage = () => {
                   <button key={sizeName} onClick={() => isAvailable && setSelectedSize(sizeName)}
                     disabled={!isAvailable}
                     className={`px-4 py-2 text-sm border rounded-md transition-colors ${
-                      selectedSize === sizeName ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-300 hover:border-black"
+                      selectedSize === sizeName ? "bg-gray-800 text-white border-gray-800" : "bg-white text-gray-700 border-gray-300 hover:border-gray-800"
                     } ${!isAvailable ? "opacity-30 cursor-not-allowed line-through" : ""}`}
                   >
                     {sizeName}
@@ -241,11 +241,11 @@ const ProductDetailPage = () => {
           </div>
 
           <button onClick={handleAddToCart}
-            className="w-full bg-black text-white py-3.5 rounded-md font-semibold hover:bg-gray-900 transition-colors mb-3">
+            className="w-full bg-gray-800 text-white py-3.5 rounded-md font-semibold hover:bg-gray-700 transition-colors mb-3">
             Add to Cart
           </button>
           <button onClick={handleBuyNow}
-            className="w-full border border-black text-black py-3.5 rounded-md font-semibold hover:bg-gray-50 transition-colors">
+            className="w-full border border-gray-800 text-black py-3.5 rounded-md font-semibold hover:bg-gray-50 transition-colors">
             Buy Now
           </button>
 

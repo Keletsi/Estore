@@ -161,7 +161,7 @@ const ShopPage = () => {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gray-700"
               />
             </div>
 
@@ -179,7 +179,7 @@ const ShopPage = () => {
                     onClick={() => setSelectedGender(opt.value)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                       selectedGender === opt.value
-                        ? "bg-black text-white"
+                        ? "bg-gray-800 text-white"
                         : "bg-gray-50 hover:bg-gray-100"
                     }`}
                   >
@@ -203,7 +203,7 @@ const ShopPage = () => {
                     onClick={() => setSelectedType(opt.value)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                       selectedType === opt.value
-                        ? "bg-black text-white"
+                        ? "bg-gray-800 text-white"
                         : "bg-gray-50 hover:bg-gray-100"
                     }`}
                   >
@@ -235,7 +235,7 @@ const ShopPage = () => {
                     placeholder="Min"
                     value={priceRange[0]}
                     onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                    className="w-1/2 border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-black"
+                    className="w-1/2 border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-gray-700"
                   />
                   <input
                     type="number"
@@ -243,7 +243,7 @@ const ShopPage = () => {
                     placeholder="Max"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 1000])}
-                    className="w-1/2 border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-black"
+                    className="w-1/2 border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-gray-700"
                   />
                 </div>
               </div>
@@ -259,10 +259,10 @@ const ShopPage = () => {
                 <Link to="/collection/women" className="block text-sm text-gray-600 hover:text-black">
                   Women's Collection
                 </Link>
-                <Link to="/sale?category=men" className="block text-sm text-[#ea2e0e] font-medium hover:underline">
+                <Link to="/sale?category=men" className="block text-sm text-gray-700 font-medium hover:underline">
                   Men's Sale
                 </Link>
-                <Link to="/sale?category=women" className="block text-sm text-[#ea2e0e] font-medium hover:underline">
+                <Link to="/sale?category=women" className="block text-sm text-gray-700 font-medium hover:underline">
                   Women's Sale
                 </Link>
               </div>
@@ -293,7 +293,7 @@ const ShopPage = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-black"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-gray-700"
               >
                 {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>

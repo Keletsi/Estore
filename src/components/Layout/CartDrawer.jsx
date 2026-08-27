@@ -40,7 +40,7 @@ const CartDrawer = ({ drawerOpen, ToggleCartDrawer }) => {
           </div>
           <button
             onClick={handleCheckout}
-            className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition-colors"
+            className="w-full bg-gray-800 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
           >
             Checkout
           </button>

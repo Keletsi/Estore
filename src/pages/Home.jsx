@@ -1,16 +1,16 @@
 import React from "react";
 import Hero from "../components/Layout/Hero";
-import GenderCollectionSection from "../components/Products/GenderCollectionSection";
+import Collaborations from "../components/Products/Collaborations";
 import NewArrivals from "../components/Products/NewArrivals";
 
 // ProductDetails has been moved to its own page (ProductDetailPage)
-// Home now shows Hero → Gender Collections → New Arrivals
+// Home now shows Hero → Collaborations → New Arrivals
 
 const Home = () => {
   return (
     <div>
       <Hero />
-      <GenderCollectionSection />
+      <Collaborations />
       <NewArrivals />
     </div>
   );

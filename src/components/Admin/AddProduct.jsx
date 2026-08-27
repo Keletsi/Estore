@@ -129,7 +129,7 @@ const AddProduct = () => {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="e.g., Classic White Tee"
           />
         </div>
@@ -146,7 +146,7 @@ const AddProduct = () => {
             required
             min="0"
             step="0.01"
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="29.99"
           />
         </div>
@@ -161,7 +161,7 @@ const AddProduct = () => {
             onChange={handleChange}
             required
             rows={3}
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             placeholder="Product description..."
           />
         </div>
@@ -175,7 +175,7 @@ const AddProduct = () => {
               name="gender"
               value={form.gender}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+              className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             >
               <option value="men">Men</option>
               <option value="women">Women</option>
@@ -190,7 +190,7 @@ const AddProduct = () => {
               name="type"
               value={form.type}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+              className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             >
               <option value="top-wear">Top Wear</option>
               <option value="bottom-wear">Bottom Wear</option>
@@ -206,7 +206,7 @@ const AddProduct = () => {
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-black"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
           />
           {imagePreview && (
             <div className="mt-3">
@@ -222,7 +222,7 @@ const AddProduct = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white py-3 rounded-md font-semibold hover:bg-gray-900 transition-colors disabled:opacity-50"
+          className="w-full bg-gray-800 text-white py-3 rounded-md font-semibold hover:bg-gray-700 transition-colors disabled:opacity-50"
         >
           {loading ? "Adding Product..." : "Add Product"}
         </button>

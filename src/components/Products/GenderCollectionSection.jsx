@@ -20,7 +20,7 @@ const GenderCollectionSection = () => {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
-          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-gray-800/20 group-hover:bg-gray-800/30 transition-colors duration-300" />
           <div className="absolute bottom-8 left-8">
             <p className="text-white text-sm font-medium uppercase tracking-widest mb-1">
               New Season
@@ -44,7 +44,7 @@ const GenderCollectionSection = () => {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
-          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-gray-800/20 group-hover:bg-gray-800/30 transition-colors duration-300" />
           <div className="absolute bottom-8 left-8">
             <p className="text-white text-sm font-medium uppercase tracking-widest mb-1">
               New Season
