@@ -5,17 +5,25 @@ import { auth } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, login } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/", { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          navigate("/");
+          navigate("/", { replace: true });
         }
       } catch (err) {
         if (err.code === "auth/popup-closed-by-user") {
@@ -29,10 +37,20 @@ const Login = () => {
     handleRedirectResult();
   }, [navigate]);
 
-  if (currentUser) {
-    navigate("/");
-    return null;
-  }
+  const handleEmailLogin = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      await login(email.trim(), password);
+      navigate("/", { replace: true });
+    } catch (err) {
+      setError(err.message || "Login failed. Please check your details.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -41,11 +59,12 @@ const Login = () => {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
       await signInWithPopup(auth, provider);
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (err) {
       if (err.code === "auth/popup-blocked" || err.code === "auth/cancelled-popup-request") {
         try {
           const provider = new GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: "select_account" });
           await signInWithRedirect(auth, provider);
           return;
         } catch (redirectError) {
@@ -64,6 +83,10 @@ const Login = () => {
     }
   };
 
+  if (currentUser) {
+    return null;
+  }
+
   return (
     <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh]">
       <div className="w-full max-w-md text-center">
@@ -75,6 +98,51 @@ const Login = () => {
             {error}
           </div>
         )}
+
+        <form onSubmit={handleEmailLogin} className="mb-6 space-y-3 text-left">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-gray-500 focus:outline-none"
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-gray-500 focus:outline-none"
+              placeholder="Your password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-md bg-gray-900 px-4 py-3 text-sm font-medium text-white hover:bg-gray-700 transition-colors disabled:opacity-60"
+          >
+            {loading ? "Signing in..." : "Sign in with email"}
+          </button>
+        </form>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase tracking-[0.2em] text-gray-400">
+            <span className="bg-white px-3">or</span>
+          </div>
+        </div>
 
         <button
           onClick={handleGoogleSignIn}
