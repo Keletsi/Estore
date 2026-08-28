@@ -4,11 +4,15 @@ import ProductGrid from "../components/Products/ProductGrid";
 import { getAllProducts, getProductsByCategory } from "../services/productService";
 
 const CATEGORY_CONFIG = {
-  all:         { label: "All Products",  filter: null },
-  men:         { label: "Men",            filter: (p) => p.gender === "men" },
-  women:       { label: "Women",          filter: (p) => p.gender === "women" },
-  "top-wear":  { label: "Top Wear",       filter: (p) => p.type === "top-wear" },
-  "bottom-wear":{ label: "Bottom Wear",  filter: (p) => p.type === "bottom-wear" },
+  all:               { label: "All Products",  filter: null },
+  "tshirts":        { label: "T-Shirts",      filter: (p) => p.type === "top-wear" || (p.type && /tee|tshirt/i.test(p.type)) || (p.name && /tee/i.test(p.name)) },
+  "collaboration":  { label: "Collaborations", filter: (p) => p.category === "collaboration" || p.category === "collabs" || p.type === "collaboration" },
+  "baseball-jackets": { label: "Baseball Jackets", filter: (p) => /baseball/i.test(p.type || "") || /baseball/i.test(p.name || "") },
+  "hockey-tops":     { label: "Hockey Tops",    filter: (p) => /hockey/i.test(p.type || "") || /hockey/i.test(p.name || "") },
+  "jeans":          { label: "Jeans",         filter: (p) => /jean/i.test(p.type || "") || /jean/i.test(p.name || "") },
+  "matric-jeans":   { label: "Matric Jeans",  filter: (p) => /matric/i.test(p.type || "") || /matric/i.test(p.name || "") },
+  "top-wear":       { label: "Top Wear",      filter: (p) => p.type === "top-wear" },
+  "bottom-wear":    { label: "Bottom Wear",   filter: (p) => p.type === "bottom-wear" },
 };
 
 const SORT_OPTIONS = [
@@ -46,11 +50,6 @@ const CollectionPage = () => {
         let fetchedProducts;
         if (searchQuery) {
           fetchedProducts = await getAllProducts();
-        } else if (category === "men" || category === "women") {
-          fetchedProducts = await getProductsByCategory(category);
-          if (typeFilter !== "all") {
-            fetchedProducts = fetchedProducts.filter(p => p.type === typeFilter);
-          }
         } else if (category === "all" || !category) {
           fetchedProducts = await getAllProducts();
           if (typeFilter !== "all") {
@@ -160,7 +159,7 @@ const CollectionPage = () => {
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-4 border-b border-gray-200">
 
-        {(category === "men" || category === "women") && !searchQuery && (
+        {!searchQuery && (
           <div className="flex gap-2 flex-wrap">
             {TYPE_FILTERS.map((f) => (
               <button

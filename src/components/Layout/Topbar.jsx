@@ -48,13 +48,13 @@ const Topbar = () => {
 
           {/* Center text */}
           <div className="text-sm text-center flex-grow">
-            <span>We ship worldwide – fast and reliable shipping</span>
+            <span>we ship locally</span>
           </div>
         </div>
 
         {/* Mobile message */}
         <div className="flex md:hidden items-center h-12 justify-center text-sm px-2">
-          <span>We ship worldwide – fast and reliable shipping</span>
+          <span>we ship locally</span>
         </div>
       </div>
     </div>

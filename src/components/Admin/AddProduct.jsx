@@ -16,7 +16,7 @@ const AddProduct = () => {
     name: "",
     price: "",
     description: "",
-    gender: "men",
+    category: "tshirts",
     type: "top-wear",
   });
 
@@ -66,9 +66,8 @@ const AddProduct = () => {
         name: form.name,
         price: parseFloat(form.price),
         description: form.description,
-        gender: form.gender,
         type: form.type,
-        category: form.gender,
+        category: form.category,
         images: [{ url: imageUrl }],
         createdAt: serverTimestamp(),
       };
@@ -82,7 +81,7 @@ const AddProduct = () => {
         name: "",
         price: "",
         description: "",
-        gender: "men",
+        category: "tshirts",
         type: "top-wear",
       });
       setImageFile(null);
@@ -169,16 +168,22 @@ const AddProduct = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Gender *
+              Category *
             </label>
             <select
-              name="gender"
-              value={form.gender}
+              name="category"
+              value={form.category}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
             >
-              <option value="men">Men</option>
-              <option value="women">Women</option>
+              <option value="tshirts">T-Shirts</option>
+              <option value="collaboration">Collaborations</option>
+              <option value="baseball-jackets">Baseball Jackets</option>
+              <option value="hockey-tops">Hockey Tops</option>
+              <option value="jeans">Jeans</option>
+              <option value="matric-jeans">Matric Jeans</option>
+              <option value="top-wear">Top Wear</option>
+              <option value="bottom-wear">Bottom Wear</option>
             </select>
           </div>
 

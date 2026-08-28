@@ -21,6 +21,8 @@ export const getAllProducts = async () => {
       id: doc.id,
       _id: doc.id,
       ...data,
+      // prefer explicit category, fall back to legacy gender field
+      category: data.category || data.gender || undefined,
       createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
     };
   }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -40,6 +42,8 @@ export const getProductById = async (id) => {
       id: snapshot.id,
       _id: snapshot.id,
       ...data,
+      // normalize category for backward compatibility
+      category: data.category || data.gender || undefined,
       createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
     };
   } catch (error) {
@@ -57,19 +61,19 @@ export const debugListAllProducts = async () => {
   return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 };
 
-export const getProductsByCategory = async (gender, type = null) => {
+export const getProductsByCategory = async (category, type = null) => {
   try {
     let q;
     if (type) {
       q = query(
-        productsRef, 
-        where("gender", "==", gender),
+        productsRef,
+        where("category", "==", category),
         where("type", "==", type)
       );
     } else {
       q = query(
-        productsRef, 
-        where("gender", "==", gender)
+        productsRef,
+        where("category", "==", category)
       );
     }
     const snapshot = await getDocs(q);
@@ -94,7 +98,7 @@ export const getProductsByCategory = async (gender, type = null) => {
         createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
       };
     });
-    return products.filter(p => p.gender === gender && (!type || p.type === type));
+    return products.filter(p => (p.category || p.gender) === category && (!type || p.type === type));
   }
 };
 

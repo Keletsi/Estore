@@ -54,10 +54,10 @@ const Hero = () => {
       <div className="absolute inset-0 bg-gray-800/60 flex items-center justify-center">
         <div className="text-center text-white p-6">
           <h1 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase mb-4">
-            BUILT FOR <br /> THE STREETS
+            THE KING OF <br /> STREETWEAR
           </h1>
           <p className="text-sm md:text-lg tracking-tight mb-6">
-            Premium streetwear for the urban lifestyle.
+            IT IS AN HONOR TO BE WORN BE AN ORIGINAL
           </p>
           <Link
             to="/shop"

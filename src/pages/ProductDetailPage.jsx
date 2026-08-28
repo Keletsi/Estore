@@ -50,9 +50,13 @@ const ProductDetailPage = () => {
         }
         setProduct(fetchedProduct);
 
-        if (fetchedProduct.gender) {
-          const similarProducts = await getProductsByCategory(fetchedProduct.gender);
-          setSimilar(similarProducts.filter(p => p._id !== id).slice(0, 4));
+        // use product type to find similar items; fall back to category or fetch all
+        try {
+          const all = await getAllProducts();
+          const similarProducts = all.filter(p => p.type === fetchedProduct.type || p.category === fetchedProduct.category);
+          setSimilar(similarProducts.filter(p => String(p._id) !== String(id)).slice(0, 4));
+        } catch (err) {
+          console.warn('Failed to fetch similar by type, skipping similar list', err);
         }
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -139,10 +143,6 @@ const ProductDetailPage = () => {
 
       <nav className="text-sm text-gray-400 mb-8 flex items-center gap-2">
         <Link to="/" className="hover:text-black transition-colors">Home</Link>
-        <span>/</span>
-        <Link to={`/collection/${product.gender}`} className="hover:text-black transition-colors capitalize">
-          {product.gender}
-        </Link>
         <span>/</span>
         <span className="text-gray-700">{product.name}</span>
       </nav>
@@ -255,7 +255,7 @@ const ProductDetailPage = () => {
               <li><span className="text-gray-900 font-medium">Brand:</span> {productDetails.brand}</li>
               <li><span className="text-gray-900 font-medium">Material:</span> {productDetails.material}</li>
               <li><span className="text-gray-900 font-medium">Category:</span> <span className="capitalize">{product.type || "top-wear"}</span></li>
-              <li><span className="text-gray-900 font-medium">Gender:</span> <span className="capitalize">{product.gender}</span></li>
+              <li><span className="text-gray-900 font-medium">Category:</span> <span className="capitalize">{product.category || product.gender}</span></li>
             </ul>
           </div>
         </div>

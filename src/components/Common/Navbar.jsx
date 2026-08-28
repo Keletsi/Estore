@@ -10,9 +10,13 @@ import { auth } from "../../firebase";
 import tallBoyLogo from "../../assets/TallBoy logo.png";
 
 const NAV_LINKS = [
-  { label: "SHOP",   to: "/shop" },
-  { label: "MEN",    to: "/shop?category=men" },
-  { label: "WOMEN",  to: "/shop?category=women" },
+  { label: "SHOP", to: "/shop" },
+  { label: "T-SHIRTS", to: "/shop?category=tshirts" },
+  { label: "COLLABS", to: "/shop?category=collaboration" },
+  { label: "BASEBALL JACKETS", to: "/shop?category=baseball-jackets" },
+  { label: "HOCKEY TOPS", to: "/shop?category=hockey-tops" },
+  { label: "JEANS", to: "/shop?category=jeans" },
+  { label: "MATRIC JEANS", to: "/shop?category=matric-jeans" },
 ];
 
 const CartButton = ({ onClick, className = "" }) => {

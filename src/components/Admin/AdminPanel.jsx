@@ -146,7 +146,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
     price: "",
     originalPrice: "",
     description: "",
-    gender: "men",
+    category: "tshirts",
     type: "top-wear",
     brand: "",
     material: "",
@@ -207,9 +207,8 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
         price: parseFloat(form.price),
         originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : null,
         description: form.description,
-        gender: form.gender,
         type: form.type,
-        category: form.gender,
+        category: form.category,
         brand: form.brand,
         material: form.material,
         sizes: form.sizes.split(",").map((s) => s.trim()).filter(Boolean).map(s => ({ name: s, available: true })),
@@ -233,7 +232,7 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
         price: "",
         originalPrice: "",
         description: "",
-        gender: "men",
+        category: "tshirts",
         type: "top-wear",
         brand: "",
         material: "",
@@ -333,15 +332,21 @@ const AddProductTab = ({ onSuccess, onError, onSuccessMsg }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
           <select
-            name="gender"
-            value={form.gender}
+            name="category"
+            value={form.category}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
           >
-            <option value="men">Men</option>
-            <option value="women">Women</option>
+            <option value="tshirts">T-Shirts</option>
+            <option value="collaboration">Collaborations</option>
+            <option value="baseball-jackets">Baseball Jackets</option>
+            <option value="hockey-tops">Hockey Tops</option>
+            <option value="jeans">Jeans</option>
+            <option value="matric-jeans">Matric Jeans</option>
+            <option value="top-wear">Top Wear</option>
+            <option value="bottom-wear">Bottom Wear</option>
           </select>
         </div>
 
@@ -562,7 +567,7 @@ const EditProductModal = ({ product, onClose, onSuccess, onError, onSuccessMsg }
     name: product.name,
     price: product.price?.toString() || "",
     description: product.description || "",
-    gender: product.gender || "men",
+    category: product.category || product.gender || "tshirts",
     type: product.type || "top-wear",
     sizes: product.sizes?.map(s => typeof s === 'string' ? s : s.name).join(", ") || "S,M,L,XL",
     colors: product.colors?.map(c => c.name).join(", ") || "Black,White",
@@ -584,8 +589,8 @@ const EditProductModal = ({ product, onClose, onSuccess, onError, onSuccessMsg }
         name: form.name,
         price: parseFloat(form.price),
         description: form.description,
-        gender: form.gender,
         type: form.type,
+        category: form.category,
         sizes: form.sizes.split(",").map(s => s.trim()).filter(Boolean).map(s => ({ name: s, available: true })),
         colors: form.colors.split(",").map(c => c.trim()).filter(Boolean).map(name => ({ name, hex: getColorHex(name), available: true })),
         stock: parseInt(form.stock) || 0,
@@ -629,10 +634,16 @@ const EditProductModal = ({ product, onClose, onSuccess, onError, onSuccessMsg }
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-              <select name="gender" value={form.gender} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700">
-                <option value="men">Men</option>
-                <option value="women">Women</option>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select name="category" value={form.category} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700">
+                <option value="tshirts">T-Shirts</option>
+                <option value="collaboration">Collaborations</option>
+                <option value="baseball-jackets">Baseball Jackets</option>
+                <option value="hockey-tops">Hockey Tops</option>
+                <option value="jeans">Jeans</option>
+                <option value="matric-jeans">Matric Jeans</option>
+                <option value="top-wear">Top Wear</option>
+                <option value="bottom-wear">Bottom Wear</option>
               </select>
             </div>
             <div>

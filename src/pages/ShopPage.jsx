@@ -19,7 +19,8 @@ const ShopPage = () => {
   const [error, setError] = useState("");
   
   const [sortBy, setSortBy] = useState("newest");
-  const [selectedGender, setSelectedGender] = useState(initialCategory);
+  // keep gender state but default to all; UI no longer uses gender filters
+  const [selectedGender, setSelectedGender] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,8 +43,16 @@ const ShopPage = () => {
   }, []);
 
   useEffect(() => {
-    if (initialCategory === "men" || initialCategory === "women") {
-      setSelectedGender(initialCategory);
+    // initialize selected type/category from query
+    if (initialCategory) {
+      // if category maps to a known type, set selectedType
+      const knownTypes = ["top-wear", "bottom-wear", "tshirts", "collaboration", "baseball-jackets", "hockey-tops", "jeans", "matric-jeans"];
+      if (knownTypes.includes(initialCategory)) {
+        setSelectedType(initialCategory === "top-wear" || initialCategory === "bottom-wear" ? initialCategory : "all");
+        setSelectedGender("all");
+      } else {
+        setSelectedGender("all");
+      }
     }
   }, [initialCategory]);
 
@@ -60,9 +69,7 @@ const ShopPage = () => {
       );
     }
 
-    if (selectedGender !== "all") {
-      results = results.filter(p => p.gender === selectedGender);
-    }
+    // gender is deprecated for filtering; prefer category/type. If legacy data uses gender, it will be handled by productService mappings.
 
     if (selectedType !== "all") {
       results = results.filter(p => p.type === selectedType);
@@ -129,8 +136,17 @@ const ShopPage = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">
-          {selectedGender === "men" ? "Men's Collection" : 
-           selectedGender === "women" ? "Women's Collection" : "Shop All"}
+          {initialCategory ? (
+            initialCategory === 'tshirts' ? 'T-Shirts' :
+            initialCategory === 'collaboration' ? 'Collaborations' :
+            initialCategory === 'baseball-jackets' ? 'Baseball Jackets' :
+            initialCategory === 'hockey-tops' ? 'Hockey Tops' :
+            initialCategory === 'jeans' ? 'Jeans' :
+            initialCategory === 'matric-jeans' ? 'Matric Jeans' :
+            'Shop'
+          ) : (
+            selectedType !== 'all' ? (selectedType === 'top-wear' ? 'Top Wear' : selectedType === 'bottom-wear' ? 'Bottom Wear' : selectedType) : 'Shop All'
+          )}
         </h1>
         <p className="text-gray-500 mt-1">
           {filteredAndSorted.length} product{filteredAndSorted.length !== 1 ? "s" : ""}
@@ -163,30 +179,6 @@ const ShopPage = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gray-700"
               />
-            </div>
-
-            {/* Gender */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">Gender</label>
-              <div className="space-y-2">
-                {[
-                  { value: "all", label: "All" },
-                  { value: "men", label: "Men" },
-                  { value: "women", label: "Women" },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setSelectedGender(opt.value)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                      selectedGender === opt.value
-                        ? "bg-gray-800 text-white"
-                        : "bg-gray-50 hover:bg-gray-100"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Type */}
@@ -253,18 +245,10 @@ const ShopPage = () => {
             <div className="pt-4 border-t">
               <p className="text-xs text-gray-500 mb-3">Quick Links</p>
               <div className="space-y-1">
-                <Link to="/collection/men" className="block text-sm text-gray-600 hover:text-black">
-                  Men's Collection
-                </Link>
-                <Link to="/collection/women" className="block text-sm text-gray-600 hover:text-black">
-                  Women's Collection
-                </Link>
-                <Link to="/sale?category=men" className="block text-sm text-gray-700 font-medium hover:underline">
-                  Men's Sale
-                </Link>
-                <Link to="/sale?category=women" className="block text-sm text-gray-700 font-medium hover:underline">
-                  Women's Sale
-                </Link>
+                <Link to="/shop?category=tshirts" className="block text-sm text-gray-600 hover:text-black">T-Shirts</Link>
+                <Link to="/shop?category=collaboration" className="block text-sm text-gray-600 hover:text-black">Collaborations</Link>
+                <Link to="/shop?category=jeans" className="block text-sm text-gray-700 font-medium hover:underline">Jeans</Link>
+                <Link to="/shop?category=matric-jeans" className="block text-sm text-gray-700 font-medium hover:underline">Matric Jeans</Link>
               </div>
             </div>
           </div>
@@ -274,15 +258,9 @@ const ShopPage = () => {
         <main className="flex-1">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200">
             <div className="flex flex-wrap gap-2">
-              {selectedGender !== "all" && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm">
-                  {selectedGender === "men" ? "Men" : "Women"}
-                  <button onClick={() => setSelectedGender("all")} className="hover:text-gray-600">×</button>
-                </span>
-              )}
               {selectedType !== "all" && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm">
-                  {selectedType === "top-wear" ? "Top Wear" : "Bottom Wear"}
+                  {selectedType === "top-wear" ? "Top Wear" : selectedType === "bottom-wear" ? "Bottom Wear" : selectedType}
                   <button onClick={() => setSelectedType("all")} className="hover:text-gray-600">×</button>
                 </span>
               )}
