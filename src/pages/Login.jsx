@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, getRedirectResult, signInWithPopup, signInWithRedirect } from "firebase/auth";
 import { auth } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 
@@ -9,6 +9,25 @@ const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          navigate("/");
+        }
+      } catch (err) {
+        if (err.code === "auth/popup-closed-by-user") {
+          setError("Sign-in cancelled");
+        } else {
+          setError(err.message || "Unable to sign in");
+        }
+      }
+    };
+
+    handleRedirectResult();
+  }, [navigate]);
 
   if (currentUser) {
     navigate("/");
@@ -20,13 +39,25 @@ const Login = () => {
     setError("");
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
       await signInWithPopup(auth, provider);
       navigate("/");
     } catch (err) {
+      if (err.code === "auth/popup-blocked" || err.code === "auth/cancelled-popup-request") {
+        try {
+          const provider = new GoogleAuthProvider();
+          await signInWithRedirect(auth, provider);
+          return;
+        } catch (redirectError) {
+          setError(redirectError.message || "Sign-in was blocked on this device");
+          return;
+        }
+      }
+
       if (err.code === "auth/popup-closed-by-user") {
         setError("Sign-in cancelled");
       } else {
-        setError(err.message);
+        setError(err.message || "Unable to sign in");
       }
     } finally {
       setLoading(false);

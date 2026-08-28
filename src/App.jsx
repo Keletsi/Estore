@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import UserLayout from "./components/Layout/UserLayout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -30,6 +30,7 @@ const App = () => {
           <Route path="collab/:id" element={<CollabPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="track" element={<OrderTracking />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
         <Route
           path="/admin/*"
@@ -39,6 +40,7 @@ const App = () => {
             </AdminRoute>
           }
         />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

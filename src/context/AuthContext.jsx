@@ -8,6 +8,12 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
+const normalizeAdminEmails = () =>
+  (import.meta.env.VITE_ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -19,19 +25,30 @@ export const useAuth = () => {
 const createUserDocument = async (user) => {
   const userDocRef = doc(db, "users", user.uid);
   const userDoc = await getDoc(userDocRef);
-  
-  const adminEmails = import.meta.env.VITE_ADMIN_EMAILS?.split(",") || [];
-  const isLocalAdmin = adminEmails.includes(user.email);
+
+  const adminEmails = normalizeAdminEmails();
+  const isLocalAdmin = adminEmails.includes((user.email || "").trim().toLowerCase());
+
+  const userData = {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName || null,
+    photoURL: user.photoURL || null,
+    role: isLocalAdmin ? "admin" : "user",
+    updatedAt: serverTimestamp(),
+  };
 
   if (!userDoc.exists()) {
     await setDoc(userDocRef, {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || null,
-      photoURL: user.photoURL || null,
-      role: isLocalAdmin ? "admin" : "user",
+      ...userData,
       createdAt: serverTimestamp(),
     });
+    return;
+  }
+
+  const existingRole = userDoc.data()?.role;
+  if (existingRole !== userData.role) {
+    await setDoc(userDocRef, userData, { merge: true });
   }
 };
 
@@ -62,14 +79,18 @@ export const AuthProvider = ({ children }) => {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           const userData = userDoc.exists() ? userDoc.data() : {};
           
-          const adminEmails = import.meta.env.VITE_ADMIN_EMAILS?.split(",") || [];
-          const isAdmin = adminEmails.includes(user.email);
-          
+          const adminEmails = normalizeAdminEmails();
+          const isAdmin = adminEmails.includes((user.email || "").trim().toLowerCase());
+
           if (isAdmin && userData.role !== "admin") {
-            await setDoc(doc(db, "users", user.uid), { role: "admin" }, { merge: true });
+            await setDoc(doc(db, "users", user.uid), { role: "admin", email: user.email, updatedAt: serverTimestamp() }, { merge: true });
             userData.role = "admin";
           }
-          
+
+          if (!userData.email && user.email) {
+            userData.email = user.email;
+          }
+
           setCurrentUser({ ...user, ...userData });
         } catch (error) {
           console.error("Error fetching user data:", error);
