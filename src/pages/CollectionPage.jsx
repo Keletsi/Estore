@@ -10,7 +10,7 @@ const CATEGORY_CONFIG = {
   "baseball-jackets": { label: "Baseball Jackets", filter: (p) => /baseball/i.test(p.type || "") || /baseball/i.test(p.name || "") },
   "hockey-tops":     { label: "Hockey Tops",    filter: (p) => /hockey/i.test(p.type || "") || /hockey/i.test(p.name || "") },
   "jeans":          { label: "Jeans",         filter: (p) => /jean/i.test(p.type || "") || /jean/i.test(p.name || "") },
-  "matric-jeans":   { label: "Matric Jeans",  filter: (p) => /matric/i.test(p.type || "") || /matric/i.test(p.name || "") },
+  "matric-jackets":   { label: "Matric Jackets",  filter: (p) => /matric/i.test(p.type || "") || /matric/i.test(p.name || "") },
   "top-wear":       { label: "Top Wear",      filter: (p) => p.type === "top-wear" },
   "bottom-wear":    { label: "Bottom Wear",   filter: (p) => p.type === "bottom-wear" },
 };

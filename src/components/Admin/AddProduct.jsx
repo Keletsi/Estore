@@ -181,7 +181,7 @@ const AddProduct = () => {
               <option value="baseball-jackets">Baseball Jackets</option>
               <option value="hockey-tops">Hockey Tops</option>
               <option value="jeans">Jeans</option>
-              <option value="matric-jeans">Matric Jeans</option>
+              <option value="matric-jackets">Matric Jackets</option>
               <option value="top-wear">Top Wear</option>
               <option value="bottom-wear">Bottom Wear</option>
             </select>

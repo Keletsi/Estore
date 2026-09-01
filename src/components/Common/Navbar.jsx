@@ -16,7 +16,7 @@ const NAV_LINKS = [
   { label: "BASEBALL JACKETS", to: "/shop?category=baseball-jackets" },
   { label: "HOCKEY TOPS", to: "/shop?category=hockey-tops" },
   { label: "JEANS", to: "/shop?category=jeans" },
-  { label: "MATRIC JEANS", to: "/shop?category=matric-jeans" },
+  { label: "MATRIC JACKETS", to: "/shop?category=matric-jackets" },
 ];
 
 const CartButton = ({ onClick, className = "" }) => {

@@ -46,7 +46,7 @@ const ShopPage = () => {
     // initialize selected type/category from query
     if (initialCategory) {
       // if category maps to a known type, set selectedType
-      const knownTypes = ["top-wear", "bottom-wear", "tshirts", "collaboration", "baseball-jackets", "hockey-tops", "jeans", "matric-jeans"];
+      const knownTypes = ["top-wear", "bottom-wear", "tshirts", "collaboration", "baseball-jackets", "hockey-tops", "jeans", "matric-jackets"];
       if (knownTypes.includes(initialCategory)) {
         setSelectedType(initialCategory === "top-wear" || initialCategory === "bottom-wear" ? initialCategory : "all");
         setSelectedGender("all");
@@ -142,7 +142,7 @@ const ShopPage = () => {
             initialCategory === 'baseball-jackets' ? 'Baseball Jackets' :
             initialCategory === 'hockey-tops' ? 'Hockey Tops' :
             initialCategory === 'jeans' ? 'Jeans' :
-            initialCategory === 'matric-jeans' ? 'Matric Jeans' :
+            initialCategory === 'matric-jackets' ? 'Matric Jackets' :
             'Shop'
           ) : (
             selectedType !== 'all' ? (selectedType === 'top-wear' ? 'Top Wear' : selectedType === 'bottom-wear' ? 'Bottom Wear' : selectedType) : 'Shop All'
@@ -248,7 +248,7 @@ const ShopPage = () => {
                 <Link to="/shop?category=tshirts" className="block text-sm text-gray-600 hover:text-black">T-Shirts</Link>
                 <Link to="/shop?category=collaboration" className="block text-sm text-gray-600 hover:text-black">Collaborations</Link>
                 <Link to="/shop?category=jeans" className="block text-sm text-gray-700 font-medium hover:underline">Jeans</Link>
-                <Link to="/shop?category=matric-jeans" className="block text-sm text-gray-700 font-medium hover:underline">Matric Jeans</Link>
+                <Link to="/shop?category=matric-jackets" className="block text-sm text-gray-700 font-medium hover:underline">Matric Jackets</Link>
               </div>
             </div>
           </div>
