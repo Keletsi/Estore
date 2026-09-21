@@ -993,7 +993,7 @@ const HeroAdTab = ({ onError, onSuccess }) => {
       setVideoFile(null);
       onSuccess(
         finalUrl && videoEnabled
-          ? "Hero video ad live — homepage alternates image / video every 2.5s"
+          ? "Hero video ad live — homepage shows image 2.5s / video 5s"
           : "Hero settings saved — homepage shows the hero picture only"
       );
     } catch (err) {
@@ -1036,7 +1036,7 @@ const HeroAdTab = ({ onError, onSuccess }) => {
         <p className="font-medium text-gray-800 mb-1">How it works</p>
         <p>
           The homepage hero shares one box between the hero picture and this video ad —
-          image shows for 2.5s, then the video for 2.5s, looping. If no video is saved
+          image shows for 2.5s, then the video for 5s, looping. If no video is saved
           (or the ad is disabled), the hero picture simply stays as-is.
         </p>
       </div>

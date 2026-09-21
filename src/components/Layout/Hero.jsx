@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import heroImg from "../../assets/TBW Fam 2.jpg.jpeg";
 import { getHeroSettings } from "../../services/siteSettingsService";
 
-const ROTATE_MS = 2500;
+const IMAGE_MS = 2500;
+const VIDEO_MS = 5000;
 
 const Hero = () => {
   const [videoUrl, setVideoUrl] = useState("");
@@ -23,18 +24,19 @@ const Hero = () => {
 
   const hasVideoAd = Boolean(videoEnabled && videoUrl);
 
-  // Share the same hero box: alternate image <-> video every 2.5s.
+  // Share the same hero box: image 2.5s -> video 5s, looping.
   // If no video ad is configured, the hero picture simply stays as-is.
   useEffect(() => {
     if (!hasVideoAd) {
       setShowVideo(false);
       return;
     }
-    const id = setInterval(() => {
+    const ms = showVideo ? VIDEO_MS : IMAGE_MS;
+    const id = setTimeout(() => {
       setShowVideo((prev) => !prev);
-    }, ROTATE_MS);
-    return () => clearInterval(id);
-  }, [hasVideoAd]);
+    }, ms);
+    return () => clearTimeout(id);
+  }, [hasVideoAd, showVideo]);
 
   useEffect(() => {
     if (showVideo && videoRef.current) {
@@ -53,7 +55,7 @@ const Hero = () => {
         }`}
       />
 
-      {/* Admin-posted short video ad (shares the same div box, 2.5s each) */}
+      {/* Admin-posted short video ad (shares the same div box: image 2.5s, video 5s) */}
       {hasVideoAd && (
         <video
           ref={videoRef}
