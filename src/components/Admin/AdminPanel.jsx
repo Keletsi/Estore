@@ -10,6 +10,7 @@ import {
   updateCollaboration,
   deleteCollaboration,
 } from "../../services/collabService";
+import { getHeroSettings, updateHeroSettings } from "../../services/siteSettingsService";
 import { HiPlus, HiPencil, HiTrash, HiX, HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 const AdminPanel = () => {
@@ -102,18 +103,18 @@ const AdminPanel = () => {
         </div>
       )}
 
-      <div className="flex gap-4 mb-8 border-b">
-        {["products", "add-product", "collabs", "orders"].map((tab) => (
+      <div className="flex gap-4 mb-8 border-b overflow-x-auto">
+        {["products", "add-product", "collabs", "hero", "orders"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`pb-3 px-2 text-sm font-medium transition-colors border-b-2 ${
+            className={`pb-3 px-2 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
               activeTab === tab
                 ? "border-gray-800 text-gray-900"
                 : "border-transparent text-gray-500 hover:text-black"
             }`}
           >
-            {tab === "products" ? "All Products" : tab === "add-product" ? "Add Product" : tab === "collabs" ? "Collaborations" : "Orders"}
+            {tab === "products" ? "All Products" : tab === "add-product" ? "Add Product" : tab === "collabs" ? "Collaborations" : tab === "hero" ? "Hero Video Ad" : "Orders"}
           </button>
         ))}
       </div>
@@ -130,8 +131,10 @@ const AdminPanel = () => {
         <AddProductTab onSuccess={fetchData} onError={showError} onSuccessMsg={showSuccess} />
       ) : activeTab === "collabs" ? (
         <CollabsTab products={products} onError={showError} onSuccess={showSuccess} />
+      ) : activeTab === "hero" ? (
+        <HeroAdTab onError={showError} onSuccess={showSuccess} />
       ) : (
-        <OrdersTab orders={orders} onError={showError} onSuccess={showSuccess} />
+        <OrdersTab orders={orders} onError={showError} onSuccess={showSuccess} onRefresh={fetchData} />
       )}
     </div>
   );
@@ -676,10 +679,12 @@ const EditProductModal = ({ product, onClose, onSuccess, onError, onSuccessMsg }
   );
 };
 
-const OrdersTab = ({ orders, onError, onSuccess }) => {
+const OrdersTab = ({ orders, onError, onSuccess, onRefresh }) => {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [trackingInput, setTrackingInput] = useState("");
+  const [savingTracking, setSavingTracking] = useState(false);
   const perPage = 10;
 
   const filtered = orders.filter((o) =>
@@ -692,8 +697,43 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
     try {
       await updateDoc(doc(db, "orders", orderId), { status: newStatus });
       onSuccess("Order status updated");
+      if (onRefresh) await onRefresh();
     } catch (err) {
       onError("Failed to update status");
+    }
+  };
+
+  // Admin manually assigns the third-party courier tracking number.
+  // The customer sees this number on the Track page.
+  const saveTrackingNumber = async (orderId) => {
+    const value = trackingInput.trim();
+    if (!value) {
+      onError("Enter a tracking number first");
+      return;
+    }
+    setSavingTracking(true);
+    try {
+      await updateDoc(doc(db, "orders", orderId), { trackingNumber: value });
+      onSuccess("Tracking number saved — customer can now see it on the Track page");
+      if (onRefresh) await onRefresh();
+    } catch (err) {
+      onError("Failed to save tracking number");
+    } finally {
+      setSavingTracking(false);
+    }
+  };
+
+  const clearTrackingNumber = async (orderId) => {
+    setSavingTracking(true);
+    try {
+      await updateDoc(doc(db, "orders", orderId), { trackingNumber: "" });
+      setTrackingInput("");
+      onSuccess("Tracking number removed");
+      if (onRefresh) await onRefresh();
+    } catch (err) {
+      onError("Failed to remove tracking number");
+    } finally {
+      setSavingTracking(false);
     }
   };
 
@@ -731,6 +771,7 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Customer</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Items</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Total</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-600">Tracking #</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Status</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Date</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Actions</th>
@@ -748,6 +789,13 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
                   </td>
                   <td className="px-4 py-3">{order.items?.length || 0}</td>
                   <td className="px-4 py-3 font-semibold">R{order.totalPrice?.toFixed(2)}</td>
+                  <td className="px-4 py-3 font-mono text-xs">
+                    {order.trackingNumber ? (
+                      <span className="bg-gray-100 px-2 py-1 rounded">{order.trackingNumber}</span>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusColors[order.status] || "bg-gray-100"}`}>
                       {order.status}
@@ -758,7 +806,10 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
                   </td>
                   <td className="px-4 py-3">
                     <button
-                      onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                      onClick={() => {
+                        setExpandedOrder(expandedOrder === order.id ? null : order.id);
+                        setTrackingInput(order.trackingNumber || "");
+                      }}
                       className="text-blue-600 hover:underline text-xs"
                     >
                       {expandedOrder === order.id ? "Hide" : "View"}
@@ -826,24 +877,223 @@ const OrdersTab = ({ orders, onError, onSuccess }) => {
                   <p className="font-medium mt-2 border-t pt-2">Total: R{order.totalPrice?.toFixed(2)}</p>
                 </div>
               </div>
-              <div className="mt-6 pt-4 border-t">
-                <label className="font-medium mr-2">Update Status:</label>
-                <select
-                  value={order.status}
-                  onChange={(e) => updateStatus(order.id, e.target.value)}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-gray-700"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+              <div className="mt-6 pt-4 border-t space-y-4">
+                <div>
+                  <label className="font-medium block mb-2 text-sm">
+                    Tracking number <span className="font-normal text-gray-500">(from your third-party courier — given to the customer)</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={expandedOrder === order.id ? trackingInput : (order.trackingNumber || "")}
+                      onChange={(e) => setTrackingInput(e.target.value)}
+                      placeholder="e.g., CW123456789ZA"
+                      className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-gray-700"
+                    />
+                    <button
+                      onClick={() => saveTrackingNumber(order.id)}
+                      disabled={savingTracking}
+                      className="bg-gray-800 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-700 disabled:opacity-50 whitespace-nowrap"
+                    >
+                      {savingTracking ? "Saving..." : "Save"}
+                    </button>
+                    {order.trackingNumber && (
+                      <button
+                        onClick={() => clearTrackingNumber(order.id)}
+                        disabled={savingTracking}
+                        className="border border-red-300 text-red-600 px-3 py-2 rounded text-sm hover:bg-red-50 disabled:opacity-50"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  {order.trackingNumber ? (
+                    <p className="text-xs text-green-700 mt-1">Customer sees: <span className="font-mono font-semibold">{order.trackingNumber}</span></p>
+                  ) : (
+                    <p className="text-xs text-gray-400 mt-1">No tracking number yet — customer sees “pending courier assignment”.</p>
+                  )}
+                </div>
+                <div>
+                  <label className="font-medium mr-2">Update Status:</label>
+                  <select
+                    value={order.status}
+                    onChange={(e) => updateStatus(order.id, e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-gray-700"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
         );
       })()}
+    </div>
+  );
+};
+
+const HeroAdTab = ({ onError, onSuccess }) => {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreview, setVideoPreview] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const settings = await getHeroSettings();
+        setVideoUrl(settings.videoUrl || "");
+        setVideoEnabled(Boolean(settings.videoEnabled && settings.videoUrl));
+        setVideoPreview(settings.videoUrl || "");
+      } catch (err) {
+        onError("Failed to load hero settings");
+      } finally {
+        setLoading(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("video/")) {
+      onError("Please choose a video file (MP4 / WebM)");
+      return;
+    }
+    if (file.size > 60 * 1024 * 1024) {
+      onError("Video must be under 60MB — keep the hero ad short");
+      return;
+    }
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      let finalUrl = videoUrl;
+      if (videoFile) {
+        const storageRef = ref(storage, `hero-ad/${Date.now()}_${videoFile.name}`);
+        await uploadBytes(storageRef, videoFile);
+        finalUrl = await getDownloadURL(storageRef);
+      }
+      if (videoEnabled && !finalUrl) {
+        throw new Error("Upload a video before enabling the ad");
+      }
+      await updateHeroSettings({ videoUrl: finalUrl, videoEnabled });
+      setVideoUrl(finalUrl);
+      setVideoFile(null);
+      onSuccess(
+        finalUrl && videoEnabled
+          ? "Hero video ad live — homepage alternates image / video every 2.5s"
+          : "Hero settings saved — homepage shows the hero picture only"
+      );
+    } catch (err) {
+      onError(err.message || "Failed to save hero video ad");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!videoUrl && !videoPreview) return;
+    if (!window.confirm("Remove the hero video ad? The homepage will show the hero picture only.")) return;
+    setSaving(true);
+    try {
+      if (videoUrl) {
+        try {
+          await deleteObject(ref(storage, videoUrl));
+        } catch (e) {}
+      }
+      await updateHeroSettings({ videoUrl: "", videoEnabled: false });
+      setVideoUrl("");
+      setVideoPreview("");
+      setVideoFile(null);
+      setVideoEnabled(false);
+      onSuccess("Video ad removed — hero picture stays as-is");
+    } catch (err) {
+      onError("Failed to remove video: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="bg-gray-100 rounded-lg h-64 animate-pulse" />;
+  }
+
+  return (
+    <div className="max-w-3xl space-y-6">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
+        <p className="font-medium text-gray-800 mb-1">How it works</p>
+        <p>
+          The homepage hero shares one box between the hero picture and this video ad —
+          image shows for 2.5s, then the video for 2.5s, looping. If no video is saved
+          (or the ad is disabled), the hero picture simply stays as-is.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Video ad file (short MP4 / WebM, under 60MB)
+        </label>
+        <input
+          type="file"
+          accept="video/mp4,video/webm,video/*"
+          onChange={handleFileChange}
+          className="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:border-gray-700"
+        />
+        {(videoPreview || videoUrl) && (
+          <video
+            key={videoPreview || videoUrl}
+            src={videoPreview || videoUrl}
+            controls
+            muted
+            loop
+            playsInline
+            className="mt-3 w-full max-w-md aspect-video object-cover rounded-lg border bg-black"
+          />
+        )}
+      </div>
+
+      <label className="flex items-center gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={videoEnabled}
+          onChange={(e) => setVideoEnabled(e.target.checked)}
+          className="h-4 w-4 accent-gray-800"
+        />
+        <span className="text-sm font-medium text-gray-700">
+          Enable video ad rotation on homepage
+        </span>
+      </label>
+
+      <div className="flex gap-3">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-gray-800 text-white px-6 py-2.5 rounded-md font-medium hover:bg-gray-700 disabled:opacity-50"
+        >
+          {saving ? "Saving..." : "Save Hero Video Ad"}
+        </button>
+        {(videoUrl || videoPreview) && (
+          <button
+            onClick={handleRemove}
+            disabled={saving}
+            className="border border-red-300 text-red-600 px-6 py-2.5 rounded-md font-medium hover:bg-red-50 disabled:opacity-50"
+          >
+            Remove Video
+          </button>
+        )}
+      </div>
     </div>
   );
 };

@@ -47,7 +47,11 @@ const OrderTracking = () => {
 
   const searchOrder = () => {
     if (!orderId.trim()) return;
-    const found = orders.find(o => o.id.toLowerCase().includes(orderId.toLowerCase()));
+    const q = orderId.trim().toLowerCase();
+    const found = orders.find(o =>
+      o.id.toLowerCase().includes(q) ||
+      (o.trackingNumber || "").toLowerCase().includes(q)
+    );
     setSearchResult(found || null);
   };
 
@@ -82,9 +86,10 @@ const OrderTracking = () => {
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Enter order ID to search..."
+            placeholder="Enter order ID or tracking number..."
             value={orderId}
             onChange={(e) => setOrderId(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") searchOrder(); }}
             className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-gray-700"
           />
           <button
@@ -136,6 +141,28 @@ const OrderTracking = () => {
                   } text-white`}>
                     {order.status}
                   </span>
+                </div>
+
+                {/* Tracking number assigned manually by admin (third-party courier) */}
+                <div className={`rounded-lg p-3 mb-6 text-sm ${order.trackingNumber ? "bg-green-50 border border-green-200" : "bg-gray-50 border border-gray-200"}`}>
+                  {order.trackingNumber ? (
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Tracking number (courier)</p>
+                        <p className="font-mono font-semibold text-base">{order.trackingNumber}</p>
+                      </div>
+                      <button
+                        onClick={() => navigator.clipboard?.writeText(order.trackingNumber)}
+                        className="text-xs border border-green-300 text-green-700 px-3 py-1.5 rounded hover:bg-green-100"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">
+                      <span className="font-medium text-gray-700">Tracking number:</span> pending — the admin will add your courier tracking number here once your order ships.
+                    </p>
+                  )}
                 </div>
 
                 <div className="relative">

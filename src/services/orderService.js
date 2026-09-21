@@ -25,6 +25,7 @@ export const createOrder = async (userId, cartItems, totalPrice, shippingInfo, p
       })),
       totalPrice,
       status: "pending",
+      trackingNumber: "",
       shippingInfo,
       paymentRef: paymentInfo.paymentRef || null,
       paymentStatus: paymentInfo.paymentStatus || "pending",
